@@ -1,0 +1,56 @@
+    1  vi /etc/yum.repos.d/CentOS-Base.repo
+    2  yum update -y
+    3  hostnamectl set-hostname worker1
+    4  exit
+    5  date -s "2 OCT 2024 17:56:00"
+    6  hwclock  -w
+    7  cat <<EOF>> /etc/hosts
+    8  192.168.0.41 master
+    9  192.168.0.42 worker1
+   10  192.168.0.43 worker2
+   11  EOF
+   12  swapoff -a
+   13  vi /etc/fstab 
+   14  yum -y install net-tools wget telnet yum-utils
+   15  yum install epel-release -y
+   16  setenforce 0
+   17  sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+   18  init 6
+   19  systemctl restart firewalld
+   20  systemctl enable firewalld
+   21  systemctl start firewalld
+   22  firewall-cmd --permanent --add-port=6443/tcp
+   23  firewall-cmd --permanent --add-port=2379-2380/tcp
+   24  firewall-cmd --permanent --add-port=10250/tcp
+   25  firewall-cmd --permanent --add-port=10251/tcp
+   26  firewall-cmd --permanent --add-port=10252/tcp
+   27  firewall-cmd --permanent --add-port=10255/tcp
+   28  firewall-cmd –-reload
+   29  systemctl restart firewalld
+   30  systemctl enable firewalld
+   31  systemctl start firewalld
+   32  firewall-cmd --permanent --add-port=6443/tcp
+   33  firewall-cmd --permanent --add-port=2379-2380/tcp
+   34  firewall-cmd --permanent --add-port=10250/tcp
+   35  firewall-cmd --permanent --add-port=10251/tcp
+   36  firewall-cmd --permanent --add-port=10252/tcp
+   37  firewall-cmd --permanent --add-port=10255/tcp
+   38  modprobe br_netfilter
+   39  echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+   40  yum install -y yum-utils
+   41  yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+   42  yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+   43  systemctl start docker
+   44  systemctl enable docker
+   45  vi  /etc/yum.repos.d/kubernetes.repo
+   46  yum install -y kubelet kubeadm kubectl
+   47  sudo systemctl enable --now kubelet
+   48  service docker status
+   49  service kubelet status
+   50  cat /etc/hosts
+   51  rm -rf /etc/containerd/config.toml
+   52  systemctl restart containerd
+   53  service kubelet status
+   54  kubeadm join 192.168.0.41:6443 --token nspnhz.9bi1giy9lso9k1ay         --discovery-token-ca-cert-hash sha256:534484500a2addaccaa87933b9ed32a36af3ec2a67a1a74b1d1547b37f0250e9
+   55  history > 2-10-24-k8s-client
+   56  history > 2-10-24-k8s-client-worker1
